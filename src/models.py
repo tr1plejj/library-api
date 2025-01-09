@@ -1,4 +1,4 @@
-from datetime import date,timedelta
+from datetime import date, timedelta
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from .database import Base

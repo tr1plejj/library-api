@@ -1,4 +1,3 @@
-from sqlalchemy import Date
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from datetime import date
 from src.database import Base

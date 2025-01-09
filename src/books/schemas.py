@@ -1,14 +1,24 @@
 from pydantic import BaseModel
-from src.authors.schemas import AuthorOutput
 
 
-class BookInput(BaseModel):
+class BookCreateUpdate(BaseModel):
     title: str
     description: str
     genre: str
     available: int
-    authors: list[AuthorOutput]
+    authors_ids: list[int]
 
 
-class BookOutput(BookInput):
+class BookOutput(BaseModel):
+
+    class AuthorInBook(BaseModel):
+        id: int
+        name: str
+
     id: int
+    title: str
+    description: str
+    genre: str
+    available: int
+    authors: list[AuthorInBook]
+

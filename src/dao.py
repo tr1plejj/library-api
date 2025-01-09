@@ -45,10 +45,10 @@ class BaseDAO:
     async def create(cls, **data):
         async with async_session() as session:
             async with session.begin():
-                new_author = cls.model(**data)
-                session.add(new_author)
+                new_object = cls.model(**data)
+                session.add(new_object)
                 await session.flush()
-                return jsonable_encoder(new_author)
+                return jsonable_encoder(new_object)
 
     @classmethod
     async def delete(cls, object_id: int):
