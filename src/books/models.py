@@ -10,7 +10,8 @@ class Book(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str]
     description: Mapped[str]
-    created_at: Mapped[date] = mapped_column(default=date.today())
+    publish_date: Mapped[date] = mapped_column(default=date.today())
     genre: Mapped[str]
     available: Mapped[int]
     authors = relationship('Author', back_populates='books', secondary='author_book')
+    users = relationship('User', back_populates='books', secondary='user_book')
