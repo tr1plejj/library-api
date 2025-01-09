@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Path
 from .dao import AuthorsDAO
-from .schemas import AuthorInput, AuthorOutput
+from .schemas import AuthorInput, AuthorOutput, AuthorUpdate
 
 router = APIRouter(
     tags=['authors'],
@@ -21,7 +21,7 @@ async def get_author(author_id: Annotated[int, Path()]):
     return author
 
 
-@router.post('/', response_model=AuthorOutput)
+@router.post('/', response_model=AuthorOutput, status_code=201)
 async def create_author(author_data: AuthorInput):
     new_author = await AuthorsDAO.create(**author_data.model_dump())
     return new_author
@@ -30,7 +30,7 @@ async def create_author(author_data: AuthorInput):
 @router.patch('/{author_id}')
 async def update_author(
         author_id: Annotated[int, Path()],
-        author_data: AuthorInput
+        author_data: AuthorUpdate
 ):
     await AuthorsDAO.update(author_id, **author_data.model_dump())
     return {'message': f'author {author_id} updated successfully'}

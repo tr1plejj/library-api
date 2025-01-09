@@ -1,7 +1,7 @@
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select, delete, update
 from .database import async_session
-from .exceptions import NotFoundException
+from .exceptions import NotFoundException, NoDataInsideException
 
 
 class BaseDAO:
@@ -63,12 +63,17 @@ class BaseDAO:
 
     @classmethod
     async def update(cls, object_id: int, **values):
+        update_values = {key: value for key, value in values.items() if value is not None}
+
+        if not update_values:
+            raise NoDataInsideException
+
         async with async_session() as session:
             async with session.begin():
                 stmt = (
                     update(cls.model).
                     filter_by(id=object_id).
-                    values(**values).
+                    values(**update_values).
                     returning(cls.model.id)
                 )
                 changed_id = await session.execute(stmt)
