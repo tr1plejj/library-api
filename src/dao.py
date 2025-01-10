@@ -39,6 +39,10 @@ class BaseDAO:
                 filter_by(**filters)
             )
             result = await session.execute(query)
+
+            if result.scalar_one_or_none() is None:
+                raise NotFoundException
+
             return result.scalar_one_or_none()
 
     @classmethod

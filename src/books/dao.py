@@ -9,7 +9,7 @@ from src.authors import Author
 from .exceptions import AuthorsNotFoundException, UserTookMaxException, NoBooksException, UserAlreadyHasException
 from src.exceptions import NoDataInsideException, NotFoundException
 from src.models import AuthorBook
-from src.users import User
+from src.auth import User
 
 
 class BooksDAO(BaseDAO):
@@ -27,7 +27,7 @@ class BooksDAO(BaseDAO):
             return books.scalars().all()
 
     @classmethod
-    async def get_book(cls, book_id: int):
+    async def get_book(cls, book_id: int):  # add exception notfound
         async with async_session() as session:
             query = (
                 select(cls.model)
@@ -35,6 +35,8 @@ class BooksDAO(BaseDAO):
                 .options(selectinload(cls.model.authors))
             )
             book = await session.execute(query)
+            if book.scalar() is None:
+                raise NotFoundException
             return book.scalar()
 
     @classmethod
@@ -87,7 +89,7 @@ class BooksDAO(BaseDAO):
                 return
 
     @classmethod
-    async def take_book(cls, user_id: int, book_id: int):
+    async def book_action(cls, user_id: int, book_id: int, action: str):  # add docstring
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -110,17 +112,15 @@ class BooksDAO(BaseDAO):
                     user_result = await session.execute(user_query)
                     user = user_result.scalar_one_or_none()
 
-                    if not user:
-                        raise NotFoundException
+                    if action == 'take':
+                        book.available -= 1
+                        book.users.append(user)
+                        return
 
-                    if not len(user.books) < 5:
-                        raise UserTookMaxException
-
-                    book.available -= 1
-
-                    book.users.append(user)
-
-                    return
+                    elif action == 'return':
+                        book.available += 1
+                        book.users.remove(user)
+                        return
 
         except IntegrityError:
             raise UserAlreadyHasException

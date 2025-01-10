@@ -1,12 +1,11 @@
 from datetime import timedelta, datetime, timezone
 import jwt
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from .models import User
 from .config import pwd_context
-from .schemas import UserInDB
 from .config import SECRET_KEY, ALGORITHM
 from src.database import async_session
-from .models import User
 
 
 def verify_password(password, hashed_password):
@@ -19,14 +18,9 @@ def hash_password(password):
 
 async def get_user(username: str):
     async with async_session() as session:
-        query = (
-            select(User).
-            filter_by(username=username)
-        )
+        query = select(User).filter_by(username=username).options(selectinload(User.books))
         user = await session.execute(query)
-        user = user.scalars().one()
-    user = jsonable_encoder(user)
-    return UserInDB(**user)
+        return user.scalar()
 
 
 async def authenticate_user(username: str, password: str):

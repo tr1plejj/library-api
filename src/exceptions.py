@@ -9,3 +9,8 @@ NoDataInsideException = HTTPException(
     status_code=400,
     detail='no data inside'
 )
+
+NoPermissionsException = HTTPException(
+    status_code=403,
+    detail='you have no permissions to do that'
+)

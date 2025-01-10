@@ -1,13 +1,4 @@
 from pydantic import BaseModel
-from src.books.schemas import BookOutput
-
-
-class User(BaseModel):
-    username: str
-
-
-class UserInDB(User):
-    hashed_password: str
 
 
 class Token(BaseModel):
@@ -15,5 +6,17 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
+class User(BaseModel):
+
+    class BookInUser(BaseModel):
+        title: str
+
+    id: int
     username: str
+    is_admin: bool
+    books: list[BookInUser]
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
