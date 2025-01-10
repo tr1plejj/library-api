@@ -1,7 +1,8 @@
 from typing import Annotated
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Path, Depends
 from .dao import BooksDAO
 from .schemas import BookOutput, BookCreate, BookUpdate
+from src.users.dependencies import get_current_user
 
 router = APIRouter(
     tags=['books'],
@@ -40,3 +41,12 @@ async def update_book(
 async def delete_book(book_id: Annotated[int, Path()]):
     await BooksDAO.delete(book_id)
     return {'message': f'book {book_id} deleted successfully'}
+
+
+@router.post("/{book_id}/take")
+async def take_book(
+    book_id: Annotated[int, Path()],
+    user = Depends(get_current_user)
+):
+    await BooksDAO.take_book(user_id=user.id, book_id=book_id)
+    return {"message": f"user {user.id} successfully took book {book_id}"}
