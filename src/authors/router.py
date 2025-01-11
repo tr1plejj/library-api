@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Path, Depends
+from fastapi import APIRouter, Path, Depends, Query
 from .dao import AuthorsDAO
 from .schemas import AuthorInput, AuthorOutput, AuthorUpdate
 from src.auth.dependencies import get_current_user
@@ -13,9 +13,12 @@ router = APIRouter(
 
 
 @router.get('/', response_model=list[AuthorOutput])
-async def get_authors():
+async def get_authors(skip: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=0)] = 0):
     authors = await AuthorsDAO.find_all()
-    return authors
+    if limit == 0:
+        return authors[skip:]
+    else:
+        return authors[skip:limit]
 
 
 @router.get('/{author_id}', response_model=AuthorOutput)

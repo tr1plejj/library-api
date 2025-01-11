@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Path, Depends
+from fastapi import APIRouter, Path, Depends, Query
 from .dao import BooksDAO
 from .schemas import BookOutput, BookCreate, BookUpdate
 from src.auth.dependencies import get_current_user
@@ -13,9 +13,12 @@ router = APIRouter(
 
 
 @router.get('/', response_model=list[BookOutput])
-async def get_books():
+async def get_books(skip: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=0)] = 0):
     books = await BooksDAO.get_all_books()
-    return books
+    if limit == 0:
+        return books[skip:]
+    else:
+        return books[skip:limit]
 
 
 @router.get('/{book_id}', response_model=BookOutput)
