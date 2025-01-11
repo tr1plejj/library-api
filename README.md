@@ -5,6 +5,7 @@
 - [Установка и запуск](#установка-и-запуск)
 - [Выдача админки (Docker)](#выдача-админки-docker)
 - [Эндпоинты](#эндпоинты)
+- [Архитектура базы данных](#архитектура-базы-данных)
 
 ***
 
@@ -17,7 +18,7 @@
 
     ### .env
     ```
-    DB_HOST=
+    DB_HOST=db
     DB_PORT=
     DB_USER=
     DB_PASSWORD=
@@ -64,11 +65,13 @@
 ### /authors
 
 - `/` [`GET`, `POST`]: получить список всех авторов либо создать нового
+  - `GET`: есть query параметры `skip` и `limit` для пагинации
 - `/{author_id}` [`GET`, `PATCH`, `DELETE`]: получить, изменить или удалить выбранного автора
 
 ### /books
 
 - `/` [`GET`, `POST`]: получить все книги или создать новую
+    - `GET`: есть query параметры `skip` и `limit` для пагинации
 - `/{book_id}` [`GET`, `POST`, `PATCH`]: получение, изменение или удаление выбранной книги
 - `/{book_id}/take` [`POST`]: взять определенную книгу
     - необходимо отметить, что пользователь ***не может взять больше пяти книг одновременно***,
@@ -82,3 +85,51 @@
 
 Для последних двух эндпоинтов добавлено логирование, все получения и возвраты книг фиксируются
 в файл `library.log`
+
+## Архитектура базы данных
+
+### Таблица `user`
+
+- `id: int`, `primary_key=True`
+- `username: str`
+- `is_admin: bool`
+- `hashed_password: str`
+- `books: relationship`
+    - связь с таблицей `book`, в качестве промежуточной таблицы указана
+  `user_book`
+
+### Таблица `author`
+
+- `id: int`, `primary_key=True`
+- `name: str`
+- `biography: str`
+- `birthday: date`
+- `books: relationship`
+    - связь с таблицей `book`, в качестве промежуточной таблицы `author_book`
+
+### Таблица `book`
+
+- `id: int`, `primary_key=True`
+- `title: str`
+- `description: str`
+- `publish_date: date` (добавляется автоматически)
+- `genre: str`
+- `available: int`
+- `authors: relationship`
+    - связь с таблицей `author`, в качестве промежуточной таблицы `author_book`
+- `users: relationship`
+    - связь с таблицей `user`, в качестве промежуточной таблицы `user_book`
+
+### Таблица для Many-to-Many связи `author_book`
+
+- `author_id: ForeignKey`, `primary_key=True`
+- `book_id: ForeignKey`, `primary_key=True` 
+
+### Таблица для Many-to-Many связи `user_book`
+
+- `user_id: ForeignKey`, `primary_key=True`
+- `book_id: ForeignKey`, `primary_key=True`
+- `receive_date: date` (добавляется автоматически, дефолтное значение
+сегодняшний день)
+- `return_date: date` (предполагаемая дата возврата, добавляется неделя
+от сегодняшнего дня)
