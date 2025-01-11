@@ -31,8 +31,7 @@
     POSTGRES_PASSWORD=
     POSTGRES_DB=
     ```
-
-5. Вы можете либо запустить проект с помощью команды из консоли:
+5. Вы можете либо запустить проект с помощью команды из консоли: `alembic upgrade head` и
 `uvicorn main:app --reload`, либо с помощью Docker: `docker-compose build` и `docker-compose up`.
 
 ## Выдача админки (Docker)
