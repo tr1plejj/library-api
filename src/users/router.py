@@ -31,7 +31,7 @@ async def get_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.post('/register', response_model=User, status_code=201)
+@router.post('/register', status_code=201)
 async def register(user_data: UserCreate):
     new_user = await UsersDAO.register(user_data)
     return new_user

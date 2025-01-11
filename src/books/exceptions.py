@@ -7,7 +7,7 @@ AuthorsNotFoundException = HTTPException(
 
 UserTookMaxException = HTTPException(
     status_code=403,
-    detail='user already took 5 books'
+    detail='user already took maximum books'
 )
 
 NoBooksException = HTTPException(
@@ -18,4 +18,9 @@ NoBooksException = HTTPException(
 UserAlreadyHasException = HTTPException(
     status_code=403,
     detail='user already has this book'
+)
+
+NoBookInUserException = HTTPException(
+    detail='user does not have this book',
+    status_code=403
 )

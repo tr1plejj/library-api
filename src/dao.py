@@ -5,18 +5,18 @@ from .exceptions import NotFoundException, NoDataInsideException
 
 
 class BaseDAO:
-    """
-    Base Data Access Object to work with all models.
-    """
+    """Base Data Access Object to work with all models."""
 
     model = None
 
     @classmethod
     async def find_all(cls, **filters):
         """
-        Finds all objects with filters.
+        Find all objects. Can apply filters.
 
-        :return: List of all founded objects.
+        :param filters: dictionary with needed fields for filter objects
+        :return: list of all founded objects
+        :rtype: list
         """
         async with async_session() as session:
             query = (
@@ -29,9 +29,10 @@ class BaseDAO:
     @classmethod
     async def find_one_or_none(cls, **filters):
         """
-        Finds particular object with filters
+        Find object. Can apply filters.
 
-        :return: Founded object.
+        :param filters: dictionary with needed field for object
+        :return: founded object
         """
         async with async_session() as session:
             query = (
@@ -39,14 +40,21 @@ class BaseDAO:
                 filter_by(**filters)
             )
             result = await session.execute(query)
+            obj = result.scalar_one_or_none()
 
-            if result.scalar_one_or_none() is None:
+            if obj is None:
                 raise NotFoundException
 
-            return result.scalar_one_or_none()
+            return obj
 
     @classmethod
     async def create(cls, **data):
+        """
+        Create new object.
+
+        :param data: dictionary with required fields for object
+        :return: new object
+        """
         async with async_session() as session:
             async with session.begin():
                 new_object = cls.model(**data)
@@ -56,17 +64,33 @@ class BaseDAO:
 
     @classmethod
     async def delete(cls, object_id: int):
+        """
+        Delete object with given id.
+
+        :return: void
+        :rtype: None
+        """
         async with async_session() as session:
             async with session.begin():
                 stmt = (
                     delete(cls.model).
-                    filter_by(id=object_id)
+                    filter_by(id=object_id).
+                    returning(cls.model.id)
                 )
-                await session.execute(stmt)
+                deleted_id = await session.execute(stmt)
+                if deleted_id.scalar() is None:
+                    raise NotFoundException
                 return
 
     @classmethod
     async def update(cls, object_id: int, **values):
+        """
+        Update object with given id and values.
+
+        :param values: dictionary with required values for update in object
+        :return: void
+        :rtype: None
+        """
         update_values = {key: value for key, value in values.items() if value is not None}
 
         if not update_values:

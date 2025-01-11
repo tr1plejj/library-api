@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -14,7 +16,7 @@ class User(BaseModel):
     id: int
     username: str
     is_admin: bool
-    books: list[BookInUser]
+    books: Optional[list[BookInUser]]
 
 
 class UserCreate(BaseModel):
