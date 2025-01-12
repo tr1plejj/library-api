@@ -13,26 +13,28 @@
 1. Скопируйте себе репозиторий `git clone`
 2. Создайте виртуальное окружение `python3 -m venv venv`
 3. Активируйте его `source venv/bin/activate`
-4. Создайте два файла в корне проекта: `.env` и `.end.db`, заполните следующим образом
+4. Создайте файл в корне проекта `.env`, заполните следующим образом
 и вставьте свои значения:
 
     ### .env
     ```
-    DB_HOST=db
+    DB_HOST=localhost
     DB_PORT=
     DB_USER=
     DB_PASSWORD=
     DB_NAME=
     ```
-   
-    ### .env.db
-    ```
-    POSTGRES_USER=
-    POSTGRES_PASSWORD=
-    POSTGRES_DB=
-    ```
+
 5. Вы можете либо запустить проект с помощью команды из консоли: `alembic upgrade head` и
-`uvicorn main:app --reload`, либо с помощью Docker: `docker-compose build` и `docker-compose up`.
+`uvicorn main:app --reload`, либо с помощью Docker: `docker-compose build` и `docker-compose up`, 
+но в таком случае вам понадобиться создать еще один файл в корне проекта `.env.db`:
+    ### .env.db
+        ```
+        POSTGRES_USER=
+        POSTGRES_PASSWORD=
+        POSTGRES_DB=
+        ```
+    А в файле `.env` заменить `DB_HOST=localhost` на `DB_HOST=db`
 
 ## Выдача админки (Docker)
 У модели пользователя есть флаг `is_admin`, который позволяет делать ему все основные
